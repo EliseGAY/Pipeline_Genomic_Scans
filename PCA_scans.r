@@ -59,7 +59,8 @@ metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$GT_sample
 pop_list = split(metadata_sorted$GT_sample, metadata_sorted$Population)
 
 # current_chr
-chr = arg[1]
+args <- commandArgs(trailingOnly = TRUE)
+chr <- as.character(args[1])
 #===================================#
 #===================================#
 # ------ ACP Sliding windows-------
