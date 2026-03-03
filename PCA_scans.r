@@ -30,23 +30,13 @@ load_all("/Package_VCF2PopStructure/")
 # Metadata pop
 #--------------#
 
-# the pop table has to be ordered in the same way as all the VCF header
-#'''
-#	pop	samples
-#	pop1 sample_1
-#	pop1 sample_2
-#	pop1 sample_3
-#	pop2 sample_4
-#	pop2 sample_5
-#'''
-
 # read metada
 metadata=read.table("metadata/metadata.txt", header = TRUE)
 metadata=as.data.frame(metadata)
 pop=unique(metadata$Population)
 
 # read chr length
-table_chr=read.table("Scaff_length_sorted.list", header = T)
+table_chr=read.table("metadata/Scaff_length_sorted.list", header = T)
 #-----------------------------------------------------------#
 # Generate Genotype tables needed in different R packages
 #-----------------------------------------------------------#
@@ -61,6 +51,7 @@ pop_list = split(metadata_sorted$GT_sample, metadata_sorted$Population)
 # current_chr
 args <- commandArgs(trailingOnly = TRUE)
 chr <- as.character(args[1])
+
 #===================================#
 #===================================#
 # ------ ACP Sliding windows-------
@@ -73,14 +64,14 @@ chr <- as.character(args[1])
 
 # Methods
 #----------------#
-# Create a table geno_table  with pos (col), ind (rows) and genotype as 0,1,2
+# Create a table geno_table  with pos (col), pos (rows) and genotype as 0,1,2
 # window : the size of the window (int)
 # slide : the size of the slide (int)
 # min_n_snp: minimum Nb of SNPs to compute PCA (100 should be enough, it is just to avoid error at the bounds of the scaffold)
 
 # OUTPUT
 #---------#
-# The Get_sw_abs return a table of sliding windows coordinates made from 1 to the last SNPs position :
+# The Get_sw_abs() return a table of sliding windows coordinates made from 1 to the last SNP position :
 # Fine-tune the wind and slide 
 #'  chr        start   end mid_point nb_snp
 #'<chr>      <int> <int>     <dbl>  <int>
@@ -88,9 +79,6 @@ chr <- as.character(args[1])
 #'2 ptg000007l  2001 12000     7000.     60
 #'3 ptg000007l  4001 14000     9000.     73
 #'4 ptg000007l  6001 16000    11000.     87
-
-# The final table is 
-# PCs_table<-cbind(low_bound,upper_bound,pca_asse1, pca_asse2)	
 
 # in "PCs" you have a matrix of four columns: 
 # col1 = lower value of the window
@@ -122,6 +110,7 @@ sw_data = Get_SW_abs(VCFR_data, slide = 5000, window = 10000)
 
 # Run PCA 
 min_snp=100
+# loop over the windows :
 for(i in 1:nrow(sw_data)){
   if(sw_data[i,]$nb_snp >= min_snp){
     pos_start = sw_data[i, "start"]
@@ -189,7 +178,7 @@ ggsave(p, path="sliding_PCA/", width = 12, height = 10, device = "pdf", filename
 
 # Methods :
 #---------#
-# create a sliding windows table based on number of SNP (and not chr length)
+# create a sliding windows table based on number of SNP using the Get_SW_SNPrange() function (and not chr length)
 # Segment genotype table according to windows
 
 # OUTPUT
@@ -233,6 +222,7 @@ sw_snp_data
 # wite table :
 sw_chr_name = paste("PCs_SNP_Sliding" , chr, "table", sep = "_")
 write.table(sw_snp_data, sw_chr_name)
+
 # Plot PC1 variance along chr
 #-----------------------------#
 # read the table if needed
