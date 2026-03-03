@@ -12,12 +12,12 @@ Provide example of genomic scan to run :
   - PCA by SW
   - PCA by SNPs
 
-### TO DO  (deleted for now because too old)
 `Fst_scans.r`
 
   - Fst by SW
   - Fst by SNPs
-    
+### TO DO  (deleted for now because too old)
+
 `theta_Scan.r`
   - Fst by SW
 
@@ -38,12 +38,12 @@ Provide example of genomic scan to run :
 
 1. **Sample summary table**
 ```
-samples pop
-sample_1 pop1
-sample_2 pop1
-sample_3 pop1
-sample_4 pop2
-sample_5 pop2
+pop pop
+pop1  sample1
+pop1  sample2
+pop1  sample3
+pop2  sample4
+pop2  sample5
 ```
 
 3. **VCF files**
@@ -52,20 +52,22 @@ sample_5 pop2
 
 
 6. **Scaffold size table**:
-
+```
 Chr length
 SUPER_1 274107945
 SUPER_2 239769335
 SUPER_3 233268383
-
+```
 ---
 
 ## Methods
 
-Genomic scans can be run independantly in order to be adapted easly within HPC (one job by chr)
+Genomic scans can be run independantly in order to be adapted easly within HPC (one SLURM job by chr)
 
 `**example**` 
 
+  - SLURM SCRIPT "run_Scan.sh"
+    
 ```
 #!/bin/sh
 #SBATCH -p std
@@ -77,17 +79,25 @@ Genomic scans can be run independantly in order to be adapted easly within HPC (
 #SBATCH -o scan_Fst_W_AnoNa_%a.o
 #SBATCH -e scan_Fst_W_AnoNa_%a.e
 
+# iterate over chr name
 chr_name=/MYPATH/chr_name.txt
 sc_list < <(cat $chr_name)
 idx=$((SLURM_ARRAY_TASK_ID-1))
 curren_sc="${sc_list[$idx]//[[:space:]]/}"
 
+# Load r module in your HPC
 module load R/4.3.3
 Rscript Fst_scans.r $curren_sc
 ```
-- And then in `Fst_scans.r`:
+
+  - Prepare the iterative variable in your R script  `Fst_scans.r`:
 
 ```r
 args <- commandArgs(trailingOnly = TRUE)
 chr <- as.character(args[1])
+```
+
+  - Run slurm script :
+```sh
+sbatch run_Scan.sh
 ```
