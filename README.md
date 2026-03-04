@@ -16,18 +16,16 @@ Provide example of genomic scan to run :
 
   - Fst by SW
   - Fst by SNPs
+
+`Freq_Genotype_scan.R`
+
+- Get overall freq of het and hom genotype
+
+
 ### TO DO  (deleted for now because too old)
 
 `theta_Scan.r`
   - Fst by SW
-
-`Fixed_Genotype_scans.r`
-
-  - Get fixed genotype in x pops vs y pops
-
-`Freq_genotype_scans.r`
-
-- Get overall freq of het and hom genotype
 
 - Global SFS by chromosome  
 - SFS in sliding windows: Euclidean distance of SFS in sliding windows vs. global SFS on chromosome
