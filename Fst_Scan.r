@@ -124,20 +124,20 @@ write.table(sw_data, "Sliding_Fst/Hudson_Fst_scans.txt")
 # pair to plot
 pairs_FST="Cesseras_Cucugnan"
 
-# Run the FST index
+
+# read the FST indices
 sw_data=read.table("SlidingFst/Hudson_Fst_scans.txt", header = TRUE)
 # read chr length
 length_chr=table_chr[which(table_chr$Chr==chr),"length"]
   
 # Format table : discard negative value
 sw_data[sw_data < 0] = 0
-colnames(sw_data)
-sw_data_Fst_pos_pair=sw_data[,c(1,2,3,4,5, which(colnames(sw_data) == pairs_FST))]
-  
+
 # plot
 plot_name=paste(chr, "_FST_",pairs_FST, sep="")
-p = ggplot() + 
-  geom_point(aes(x=sw_data_Fst_pos_pair$mid_point,y=sw_data_Fst_pos_pair$Cesseras_Cucugnan),
+
+p = ggplot(data = sw_data) + 
+  geom_point(aes_string(x="mid_point",y=pairs_FST),
              alpha = 0.6,
              color = "darkred",
              pch=1) +
@@ -157,8 +157,8 @@ p = ggplot() +
                                         colour = "black",
                                         size = 0.5)) +
   
-  scale_x_continuous(breaks = seq(0, chr_len, 
-                                  by = round(chr_len/15))) +
+  scale_x_continuous(breaks = seq(0, length_chr, 
+                                  by = round(length_chr/15))) +
   scale_y_continuous(breaks = seq(0, 1, 
                                   by = 0.1), limits = c(0,1))
 
