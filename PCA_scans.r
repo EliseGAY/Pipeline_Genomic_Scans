@@ -17,7 +17,7 @@ library(basetheme)
 library(devtools)
 library(GenomicRanges)
 
-system2("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
+system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
 load_all("/Package_VCF2PopStructure/")
 
 #===============================#
