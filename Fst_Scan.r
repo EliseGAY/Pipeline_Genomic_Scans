@@ -114,7 +114,7 @@ for(i in 1:nrow(sw_data)){
     sw_data[i, colcount] = Fst_all
   }
 }
-
+colnames(sw_data) = c(colnames(sw_data)[1:5], names(Fst_all))
 # save
 write.table(sw_data, "Sliding_Fst/Hudson_Fst_scans.txt")
 
