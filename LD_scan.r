@@ -1,39 +1,44 @@
 #!/usr/bin/env Rscript
 
+#!/usr/bin/env Rscript
+
 #============================#
 #============================#
 # ------ Load libraries ----
 #============================#
 #============================#
-library(IRanges)
-library(vcfR)
-library(pegas)
+
 library(ggplot2)
-library(adegenet)
-library(hierfstat)
-library(reshape2)
-library(pcadapt)
-library(ggrepel)
-library(gridExtra)
 library(stringr)
 library(devtools)
-library(GenomicRanges)
 library(LDheatmap)
 library(RColorBrewer)
 library(snpStats)
 library(tibble)
-system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
-load_all("Package_VCF2PopStructure/")
+# system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
+load_all("../Package_VCF2PopStructure/")
 
+# read arg 
+chr = arg[2]
+metadata = arg[3]
+length_table = arg[4]
+vcf = arg[1]
+  
 #===============================#
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
+getwd()
+dir()
+if (!dir.exists("LD_heatmap")) {
+  dir.create("LD_heatmap")
+}
 
-#--------------#
-# Metadata pop
-#--------------#
+
+#----------------------------#
+# to test in the toy example
+#----------------------------#
 
 # the pop table has to be ordered in the same way as all the VCF header
 #'''
@@ -46,35 +51,38 @@ load_all("Package_VCF2PopStructure/")
 #'''
 
 # read metada
-metadata=read.table("data/metadata.txt", header = TRUE)
+metadata=read.table("metadata/metadata.txt", header = TRUE)
 metadata=as.data.frame(metadata)
 pop=unique(metadata$Population)
-pop_list = split(metadata$sample, metadata$Population)
 
 # read chr length
-table_chr=read.table("Scaff_length_sorted.list", header = T)
+table_chr=read.table("metadata/table_chr_length.txt", header = T)
 
-#-----------------------------------------------------------#
-# Generate Genotype tables needed in different R packages
-#-----------------------------------------------------------#
+# set chr name
+chr = "CHR1"
 
 # Read the VCF with vcfR :
-VCFR_data=read.vcfR("data/CHR1_Flowqual_Noindels_Norepeat_DP10_50_Na0_SNP.vcf.gz", verbose = TRUE)
+VCFR_data=read.vcfR(paste("data/",chr, "_Example.vcf.gz", sep =""))
 
-# current_chr
-chr = arg[1]
-# to test in local example 
-chr = "chr1"
-chr_len = table_chr[which(table_chr$scaffold == chr),]$length
+# create a pop sorted by VCF colnames
+metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$sample),]
+pop_list = split(metadata_sorted$sample, metadata_sorted$Social_Morph)
+
+# read chr langth table
+chr_len = table_chr[which(table_chr$Chr == chr),]$length
 
 #=========================#
 #=========================#
 # ------ LD heatmap ----
 #=========================#
 #=========================#
+#=========================#
+#=========================#
+# ------ LD heatmap ----
+#=========================#
+#=========================#
 # bin data
-data_bin <- bin_snps(vcf = VCFR_pop1, bin_size = 200)
-data_bin
+data_bin <- bin_snps(vcf = VCFR_data, bin_size = 1)
 
 # run LDheatmap
 snp_matrix <- vcfR2SnpMatrix(data_bin, phased = NULL, subjects = NULL)
@@ -86,7 +94,7 @@ snp_matrix$genetic.distances # these are the snps positions
 colors <- brewer.pal(9,"Reds")
 colors <- colors[c(9,8,7,6,5,4,3,2,1)]
 
-nompng=paste0("LDheatmap_2",chr,".png")
+nompng=paste0("LD_heatmap/LDheatmap_",chr,".png")
 png(nompng, width = 11.69*1000, height = 8.27*1000, res = 1000)
 LD <- LDheatmap(snp_matrix$data, snp_matrix$genetic.distances, flip = T, color = colors)
 dev.off()
@@ -94,7 +102,7 @@ dev.off()
 # explore LD object
 dim(LD$LDmatrix)
 LD$LDmatrix[c(1:10), c(1:10)]
-LD$genetic.distances # these are the snps positions
+head(LD$genetic.distances) # these are the snps positions
 
 # extract SNP with correlation superior to "threshold"
 indices_table = as.data.frame(which(LD$LDmatrix >= 0.9, arr.ind=TRUE))
@@ -108,4 +116,4 @@ length(snp2) = max(length(snp1), length(snp2))
 snp_table = data.frame("snp1" = as.numeric(snp1), "snp2" = as.numeric(snp2))
 
 # write result
-write.table(snp_table, paste0("Coord_",chr,".txt"), sep = " ", row.names = TRUE, col.names = TRUE)
+write.table(snp_table, paste0("LD_heatmap/Coord_",chr,".txt"), sep = " ", row.names = TRUE, col.names = TRUE)
