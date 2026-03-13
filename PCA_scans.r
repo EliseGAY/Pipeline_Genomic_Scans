@@ -25,17 +25,13 @@ load_all("../Package_VCF2PopStructure/")
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
-# read arg 
-chr = arg[2]
-metadata = arg[3]
-length_table = arg[4]
-vcf = arg[1]
+# When runing loop over all chr vcf : 
+# chr = arg[2]
+# metadata = arg[3]
+# length_table = arg[4]
+# vcf = arg[1]
 
-#===============================#
-#===============================#
-# ------ PREPARE YOUR DATA ----
-#===============================#
-#===============================#
+
 getwd()
 dir()
 if (!dir.exists("PCA_scans")) {
