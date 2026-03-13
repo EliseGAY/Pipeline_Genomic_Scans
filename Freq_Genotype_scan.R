@@ -13,32 +13,16 @@ library(devtools)
 # system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
 load_all("../Package_VCF2PopStructure/")
 
-#!/usr/bin/env Rscript
-
-#============================#
-#============================#
-# ------ Load libraries ----
-#============================#
-#============================#
-library(vcfR)
-library(ggplot2)
-library(reshape2)
-library(stringr)
-library(devtools)
-# system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
-load_all("../Package_VCF2PopStructure/")
-
-# read arg 
-chr = arg[2]
-metadata = arg[3]
-length_table = arg[4]
-vcf = arg[1]
-
 #===============================#
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
+# When runing loop over all chr vcf : 
+# chr = arg[2]
+# metadata = arg[3]
+# length_table = arg[4]
+# vcf = arg[1]
 
 #----------------------------#
 # to test in the toy example
