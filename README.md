@@ -1,6 +1,5 @@
 ### Genomic Scans in Sliding Windows
 
-**Contributors:** 
 
 ---
 
@@ -21,6 +20,9 @@ Provide example of genomic scan to run :
 
 - Get overall freq of het and hom genotype
 
+`LD_scan.r` :  (Contributors: Hugo Deshayes, PhD, EPHE)
+
+- Use LDHeatmap to compute LD on binned VCF
 
 ### TO DO  (deleted for now because too old)
 
@@ -29,7 +31,7 @@ Provide example of genomic scan to run :
 
 - Global SFS by chromosome  
 - SFS in sliding windows: Euclidean distance of SFS in sliding windows vs. global SFS on chromosome
-- LD (to do)  
+ 
 ---
 
 ### Input
