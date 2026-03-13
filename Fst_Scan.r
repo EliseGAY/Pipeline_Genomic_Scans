@@ -27,9 +27,9 @@ load_all("../Package_VCF2PopStructure/")
 #===============================#
 #===============================#
 
-#--------------#
-# Metadata pop
-#--------------#
+#----------------------------#
+# to test in the toy example
+#----------------------------#
 
 # the pop table has to be ordered in the same way as all the VCF header
 #'''
@@ -49,21 +49,17 @@ pop=unique(metadata$Population)
 # read chr length
 table_chr=read.table("metadata/table_chr_length.txt", header = T)
 
-#-----------------------------------------------------------#
-# Generate Genotype tables needed in different R packages
-#-----------------------------------------------------------#
+# set chr name
+chr = "CHR1"
 
 # Read the VCF with vcfR :
-VCFR_data=read.vcfR("data/Chr1_Example.vcf.gz")
+VCFR_data=read.vcfR(paste("data/",chr, "_Example.vcf.gz", sep =""))
 
 # create a pop sorted by VCF colnames
 metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$sample),]
 pop_list = split(metadata_sorted$sample, metadata_sorted$Social_Morph)
 
-# current_chr
-chr = arg[1]
-# to test in local example 
-chr = "CHR1"
+# read chr langth table
 chr_len = table_chr[which(table_chr$Chr == chr),]$length
 
 #===============================================#
