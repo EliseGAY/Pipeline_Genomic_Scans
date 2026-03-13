@@ -13,15 +13,36 @@ library(devtools)
 # system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
 load_all("../Package_VCF2PopStructure/")
 
+#!/usr/bin/env Rscript
+
+#============================#
+#============================#
+# ------ Load libraries ----
+#============================#
+#============================#
+library(vcfR)
+library(ggplot2)
+library(reshape2)
+library(stringr)
+library(devtools)
+# system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
+load_all("../Package_VCF2PopStructure/")
+
+# read arg 
+chr = arg[2]
+metadata = arg[3]
+length_table = arg[4]
+vcf = arg[1]
+
 #===============================#
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
 
-#--------------#
-# Metadata pop
-#--------------#
+#----------------------------#
+# to test in the toy example
+#----------------------------#
 
 # the pop table has to be ordered in the same way as all the VCF header
 #'''
@@ -41,22 +62,19 @@ pop=unique(metadata$Population)
 # read chr length
 table_chr=read.table("metadata/table_chr_length.txt", header = T)
 
-#-----------------------------------------------------------#
-# Generate Genotype tables needed in different R packages
-#-----------------------------------------------------------#
+# set chr name
+chr = "CHR1"
 
 # Read the VCF with vcfR :
-VCFR_data=read.vcfR("data/Chr1_Example.vcf.gz")
+VCFR_data=read.vcfR(paste("data/",chr, "_Example.vcf.gz", sep =""))
 
 # create a pop sorted by VCF colnames
 metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$sample),]
 pop_list = split(metadata_sorted$sample, metadata_sorted$Social_Morph)
 
-# current_chr
-chr = arg[1]
-# to test in local 
-chr = "CHR1"
+# read chr langth table
 chr_len = table_chr[which(table_chr$Chr == chr),]$length
+
 
 #===============================================#
 #===============================================#
