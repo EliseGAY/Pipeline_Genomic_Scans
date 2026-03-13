@@ -18,17 +18,44 @@ library(devtools)
 library(GenomicRanges)
 
 system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
-load_all("/Package_VCF2PopStructure/")
+load_all("../Package_VCF2PopStructure/")
 
 #===============================#
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
+# read arg 
+chr = arg[2]
+metadata = arg[3]
+length_table = arg[4]
+vcf = arg[1]
 
-#--------------#
-# Metadata pop
-#--------------#
+#===============================#
+#===============================#
+# ------ PREPARE YOUR DATA ----
+#===============================#
+#===============================#
+getwd()
+dir()
+if (!dir.exists("PCA_scans")) {
+  dir.create("PCA_scans")
+}
+
+
+#----------------------------#
+# to test in the toy example
+#----------------------------#
+
+# the pop table has to be ordered in the same way as all the VCF header
+#'''
+#	pop	samples
+#	pop1 sample_1
+#	pop1 sample_2
+#	pop1 sample_3
+#	pop2 sample_4
+#	pop2 sample_5
+#'''
 
 # read metada
 metadata=read.table("metadata/metadata.txt", header = TRUE)
@@ -36,21 +63,20 @@ metadata=as.data.frame(metadata)
 pop=unique(metadata$Population)
 
 # read chr length
-table_chr=read.table("metadata/Scaff_length_sorted.list", header = T)
-#-----------------------------------------------------------#
-# Generate Genotype tables needed in different R packages
-#-----------------------------------------------------------#
+table_chr=read.table("metadata/table_chr_length.txt", header = T)
+
+# set chr name
+chr = "CHR1"
 
 # Read the VCF with vcfR :
-VCFR_data=read.vcfR("data/VCF_example.vcf.gz")
+VCFR_data=read.vcfR(paste("data/",chr, "_Example.vcf.gz", sep =""))
 
 # create a pop sorted by VCF colnames
-metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$GT_sample),]
-pop_list = split(metadata_sorted$GT_sample, metadata_sorted$Population)
+metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$sample),]
+pop_list = split(metadata_sorted$sample, metadata_sorted$Social_Morph)
 
-# current_chr
-args <- commandArgs(trailingOnly = TRUE)
-chr <- as.character(args[1])
+# read chr langth table
+chr_len = table_chr[which(table_chr$Chr == chr),]$length
 
 #===================================#
 #===================================#
@@ -87,29 +113,30 @@ chr <- as.character(args[1])
 # col3 = % of variance of the first axe
 # col4 = % of variance of the second axe
 
-# Create directory
-if (!dir.exists("sliding_PCA")) {
-  dir.create("sliding_PCA")
-}
 
 # get genotype table
 loci_table = extract.gt(VCFR_data, element = "GT")
 loci_table = as.data.frame(loci_table)
 geno_table = t(Convert_GT(GT_table = loci_table))
 
-# geno_table[c(1:10),c(1:10)]
-#'                ptg000007l_8628 ptg000007l_8631 ptg000007l_8633 ptg000007l_8639 ptg000007l_9618 ptg000007l_9622 ptg000007l_9625 ptg000007l_9626
-#'1622W1_S254               0               0               0               0              NA              NA              NA              NA
-#'1623W1_S276               0               0               0               0              NA              NA              NA              NA
-#'1624W1_S392               0               0               0               0              NA               0               0               0
-#'1625Q_S431                0               0               0               0              NA              NA              NA              NA
-#'1625W1_S384               0               0               0               0               1               1               1               1
+geno_table[c(1:10),c(1:10)]
+#                   CHR1_159039 CHR1_219063 CHR1_254450 CHR1_359471 CHR1_376366 CHR1_416191 CHR1_464593 CHR1_486240
+#10_Q_S_A_S9            0           0           0           0           0           1           0           0
+#12_Q_S_A_S11           1           0           0           1           0           2           0           0
+#13_Q_A_S12             0           0           1           0           0           1           0           1
+#14_Q_A_S13             1           0           0           1           0           1           0           0
+#15_Q_A_S14             0           0           0           0           0           1           0           0
+#16_Q_A_S15             0           0           0           1           0           2           0           0
+#17_Q_A_S16             0           0           0           0           0           2           0           0
+#18_Q_A_S17             0           0           0           1           0           2           0           0
+#19_Q_A_S18             0           0           0           1           0           1           0           0
+#1_Q_S_A_S1             0           0           0           2           0           2           0           0
 
 # get SW table :
-sw_data = Get_SW_abs(VCFR_data, slide = 5000, window = 10000)
+sw_data = Get_SW_abs(VCFR_data, slide = 100000, window = 200000)
 
 # Run PCA 
-min_snp=100
+min_snp=10
 # loop over the windows :
 for(i in 1:nrow(sw_data)){
   if(sw_data[i,]$nb_snp >= min_snp){
@@ -127,7 +154,7 @@ for(i in 1:nrow(sw_data)){
 }
 
 # wite table :
-sw_chr_name = paste("PCs_Sliding" , chr, "table", sep = "_")
+sw_chr_name = paste("PCA_scans/PCs_Sliding" , chr, "table", sep = "_")
 write.table(sw_data, sw_chr_name)
 
 # Plot PC1 variance along chr
@@ -135,15 +162,14 @@ write.table(sw_data, sw_chr_name)
 # read the table if needed
 # sw_data=read.table(paste("Sliding_PCA/PCs_Sliding", , chr, "table" sep = "_"), header=TRUE)
 
-# get current chr length
-length_chr=table_chr[which(table_chr$scaffold==chr),"length"]
-  
 # plot 
 p=ggplot() +
   geom_point(aes(x=sw_data$mid_point, y=sw_data$PC1),
-             color = "darkgreen",
              alpha = 0.5,
-             size=1)+
+             fill = "lightblue3",
+             color = "lightcyan4",
+             size = 2,
+             pch=21) +
   
   labs(x="", y = "PC 1") +
   
@@ -157,14 +183,14 @@ p=ggplot() +
                                         colour = "black",
                                         size = 0.5)) +
   
-  scale_x_continuous(breaks = seq(0, length_chr, 
-                                  by = round(length_chr/15))) +
+  scale_x_continuous(breaks = seq(0, chr_len, 
+                                  by = round(chr_len/15))) +
   
   scale_y_continuous(breaks = seq(0, 100, by = 10), limits = c(1,100))
 
 p
 
-ggsave(p, path="sliding_PCA/", width = 12, height = 10, device = "pdf", filename = paste(chr, "PCA_scans.pdf",sep = "_"))
+ggsave(p, path="PCA_scans/", width = 10, height = 5, device = "pdf", filename = paste(chr, "PCA_scans.pdf",sep = "_"))
 
 #===================================#
 #===================================#
@@ -198,7 +224,7 @@ ggsave(p, path="sliding_PCA/", width = 12, height = 10, device = "pdf", filename
 
 # Get SNP range sliding windows 
 # Set the value of nb snp windows and nb snp slide 
-sw_snp_data = Get_SW_SNPrange(VCF = VCFR_data)
+sw_snp_data = Get_SW_SNPrange(VCF = VCFR_data,nb_snp_wind = 20, nb_snp_slide = 10)
 
 # compute PCA
 for(i in 1:nrow(sw_snp_data)){
@@ -220,7 +246,7 @@ sw_snp_data
 
 
 # wite table :
-sw_chr_name = paste("PCs_SNP_Sliding" , chr, "table", sep = "_")
+sw_chr_name = paste("PCA_scans/PCs_SNP_Sliding" , chr, "table", sep = "_")
 write.table(sw_snp_data, sw_chr_name)
 
 # Plot PC1 variance along chr
@@ -228,15 +254,14 @@ write.table(sw_snp_data, sw_chr_name)
 # read the table if needed
 # sw_data=read.table(paste("Sliding_PCA/PCs_Sliding", , chr, "table" sep = "_"), header=TRUE)
 
-# get current chr length
-length_chr=table_chr[which(table_chr$scaffold==chr),"length"]
-
 # plot 
 p=ggplot() +
   geom_point(aes(x=sw_snp_data$mid_point, y=sw_snp_data$PC1),
-             color = "darkred",
              alpha = 0.5,
-             size=1)+
+             fill = "lightblue3",
+             color = "lightcyan4",
+             size = 2,
+             pch=21) +
   
   labs(x="", y = "PC 1") +
   
@@ -257,4 +282,4 @@ p=ggplot() +
 
 p
 
-ggsave(p, path="sliding_PCA/", width = 12, height = 10, device = "pdf", filename = paste(chr, "PCA_scans.pdf",sep = "_"))
+ggsave(p, path="PCA_scans/", width = 10, height = 5, device = "pdf", filename = paste(chr, "PCA_BySNP_scans.pdf",sep = "_"))
