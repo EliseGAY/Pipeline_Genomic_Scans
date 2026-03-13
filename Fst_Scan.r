@@ -25,7 +25,11 @@ load_all("../Package_VCF2PopStructure/")
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
-#===============================#
+# When runing loop over all chr vcf : 
+# chr = arg[2]
+# metadata = arg[3]
+# length_table = arg[4]
+# vcf = arg[1]
 
 #----------------------------#
 # to test in the toy example
