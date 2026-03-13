@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript
 
-#!/usr/bin/env Rscript
-
 #============================#
 #============================#
 # ------ Load libraries ----
@@ -18,17 +16,18 @@ library(tibble)
 # system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
 load_all("../Package_VCF2PopStructure/")
 
-# read arg 
-chr = arg[2]
-metadata = arg[3]
-length_table = arg[4]
-vcf = arg[1]
-  
+
 #===============================#
 #===============================#
 # ------ PREPARE YOUR DATA ----
 #===============================#
 #===============================#
+# When runing loop over all chr vcf : 
+# chr = arg[2]
+# metadata = arg[3]
+# length_table = arg[4]
+# vcf = arg[1]
+
 getwd()
 dir()
 if (!dir.exists("LD_heatmap")) {
