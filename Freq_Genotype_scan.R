@@ -10,8 +10,8 @@ library(ggplot2)
 library(reshape2)
 library(stringr)
 library(devtools)
-system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
-load_all("Package_VCF2PopStructure/")
+# system("git clone https://github.com/EliseGAY/Package_VCF2PopStructure.git")
+load_all("../Package_VCF2PopStructure/")
 
 #===============================#
 #===============================#
@@ -39,7 +39,7 @@ metadata=as.data.frame(metadata)
 pop=unique(metadata$Population)
 
 # read chr length
-table_chr=read.table("Scaff_length_sorted.list", header = T)
+table_chr=read.table("metadata/table_chr_length.txt", header = T)
 
 #-----------------------------------------------------------#
 # Generate Genotype tables needed in different R packages
