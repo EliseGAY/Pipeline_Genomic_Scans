@@ -46,17 +46,17 @@ table_chr=read.table("metadata/table_chr_length.txt", header = T)
 #-----------------------------------------------------------#
 
 # Read the VCF with vcfR :
-VCFR_data=read.vcfR("../data/VCF_example.NoNa.SNP.vcf.gz")
+VCFR_data=read.vcfR("data/Chr1_Example.vcf.gz")
 
 # create a pop sorted by VCF colnames
-metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$GT_sample),]
-pop_list = split(metadata_sorted$GT_sample, metadata_sorted$Population)
+metadata_sorted <- metadata[match(colnames(VCFR_data@gt)[-1], metadata$sample),]
+pop_list = split(metadata_sorted$sample, metadata_sorted$Social_Morph)
 
 # current_chr
 chr = arg[1]
 # to test in local 
-chr = "ptg000007l"
-chr_len = table_chr[which(table_chr$scaffold == chr),]$length
+chr = "CHR1"
+chr_len = table_chr[which(table_chr$Chr == chr),]$length
 
 #===============================================#
 #===============================================#
@@ -70,7 +70,27 @@ if (!dir.exists("Geno_Freq")) {
   dir.create("Geno_Freq")
 }
 
+# get genotype table
+loci_table = extract.gt(VCFR_data, element = "GT")
+loci_table = as.data.frame(loci_table)
+geno_table = Convert_GT(GT_table = loci_table)
+
+# geno_table[c(1:10),c(1:10)]
+#                10_Q_S_A_S9 12_Q_S_A_S11 13_Q_A_S12 14_Q_A_S13 15_Q_A_S14 16_Q_A_S15 17_Q_A_S16 18_Q_A_S17 19_Q_A_S18 1_Q_S_A_S1
+#CHR1_159039           0            1          0          1          0          0          0          0          0          0
+#CHR1_219063           0            0          0          0          0          0          0          0          0          0
+#CHR1_254450           0            0          1          0          0          0          0          0          0          0
+#CHR1_359471           0            1          0          1          0          1          0          1          1          2
+#CHR1_376366           0            0          0          0          0          0          0          0          0          0
+#CHR1_416191           1            2          1          1          1          2          2          2          1          2
+#CHR1_464593           0            0          0          0          0          0          0          0          0          0
+#CHR1_486240           0            0          1          0          0          0          0          0          0          0
+#CHR1_493425           0            0          0          0          0          0          1          0          0          0
+#CHR1_514070           0            0          0          0          1          0          0          0          0          0
+ 
 table = GetGenoFreqByPop(geno_table = loci_table, chr_name = chr, ploidy = "diploid", pop_list = pop_list)
+
+head(table)
 
 # write final table
 write.table(table, "Geno_Freq/table_geno_freq.txt", quote=F, row.names = F)
@@ -79,14 +99,14 @@ write.table(table, "Geno_Freq/table_geno_freq.txt", quote=F, row.names = F)
 geno_file=read.table("Geno_Freq/table_geno_freq.txt")
 
 # get size of the current chromosome
-length_chr=table_chr[which(table_chr$scaffold==chr),"length"]
+length_chr=table_chr[which(table_chr$Chr==chr),"length"]
 
 # plot
-ggplot() +
+p = ggplot() +
   geom_point(data=table,
-             aes(x=table$position,y=table$Cesseras_het_freq), color="red", pch=19,alpha=0.1) +
+             aes(x=table$position,y=table$monogyne_het_freq), color="red", pch=19,alpha=0.5) +
   geom_point(data=table,
-             aes(x=table$position,y=table$Termes_het_freq), color="blue",pch=19, alpha=0.1) +
+             aes(x=table$position,y=table$polygyne_het_freq), color="blue",pch=19, alpha=0.5) +
   
   ylab("Heterozygous rate by position in two pop") +
   
