@@ -36,7 +36,7 @@ Provide example of genomic scan to run :
 
 ### Input
 
-1. **Sample summary table**
+1. **metadata summary table**
 ```
 pop pop
 pop1  sample1
@@ -50,19 +50,32 @@ pop2  sample5
 
 4. **Position files** (two columns: scaffold and position — adapt to your file names):
 
+5. **CHR name in bash list**
 
-6. **Scaffold size table**:
+chr_name=("CHR1" "CHR2" "CHR3")
+
+7. **Scaffold size table**:
 ```
 Chr length
-SUPER_1 274107945
-SUPER_2 239769335
-SUPER_3 233268383
+CHR1 274107945
+CHR2 239769335
+CHR3 233268383
 ```
 ---
 
 ## Methods
 
-Genomic scans can be run independantly in order to be adapted easly within HPC (one SLURM job by chr)
+  - Genomic scans can be run independantly in order to be adapted easly within HPC (one SLURM job by chr)
+
+  - Fill the arguments value according to the R script
+
+```
+vcf = arg[1] #VCF path of the corresponding chromosome
+chr = arg[2] #chr name
+metadata = arg[3] #path to metadata (col1 = population , col2 = samples ID)
+length_table = arg[4] #table of chr length (see metadata)
+```
+
 
 `**example**` 
 
@@ -79,22 +92,27 @@ Genomic scans can be run independantly in order to be adapted easly within HPC (
 #SBATCH -o scan_Fst_W_AnoNa_%a.o
 #SBATCH -e scan_Fst_W_AnoNa_%a.e
 
-# iterate over chr name
-chr_name=/MYPATH/chr_name.txt
-sc_list < <(cat $chr_name)
-idx=$((SLURM_ARRAY_TASK_ID-1))
-curren_sc="${sc_list[$idx]//[[:space:]]/}"
+# SET THE VARIABLE TO FEED TO RScript
+##########################################
 
+# iterate over chr name
+idx=$((SLURM_ARRAY_TASK_ID-1))
+curren_sc=chr_name[$idx]
+
+# get VCf path
+current_vcf=$("data/"${curren_sc}"_Example.vcf.gz")
+# get chr length table
+chr_lentgh="table_chr_length.txt"
+# metadata
+metadata="metadata/metadata.txt"
 # Load r module in your HPC
 module load R/4.3.3
-Rscript Fst_scans.r $curren_sc
-```
 
-  - Prepare the iterative variable in your R script  `Fst_scans.r`:
+# run the Rscript
+################
 
-```r
-args <- commandArgs(trailingOnly = TRUE)
-chr <- as.character(args[1])
+Rscript Fst_scans.r $current_vcf $chr $curren_sc $metadata $length_table 
+
 ```
 
   - Run slurm script :
