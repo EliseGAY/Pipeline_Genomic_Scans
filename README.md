@@ -24,12 +24,13 @@ Provide example of genomic scan to run :
 
 - Use LDHeatmap to compute LD on binned VCF
 
-### TO DO  (deleted for now because too old)
 
-`theta_Scan.r`
+`NucDiv_scan.r`
+
   - theta by SW
 
-- Global SFS by chromosome  
+### TO DO  (deleted for now because too old)
+
 - SFS in sliding windows: Euclidean distance of SFS in sliding windows vs. global SFS on chromosome
  
 ---
