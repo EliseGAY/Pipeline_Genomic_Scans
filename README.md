@@ -19,7 +19,8 @@ Provide example of genomic scan to run :
 `Freq_Genotype_scan.R`
 
 - Get overall freq of het and hom genotype
-
+- Get distribution of genotypes (0,1,2) on specific region over individual or group
+  
 `LD_scan.r` :  (Contributors: Hugo Deshayes, PhD, EPHE)
 
 - Use LDHeatmap to compute LD on binned VCF
