@@ -134,3 +134,56 @@ p = ggplot() +
                      limits = c(0, length_chr))
 # save
 ggsave(p, path="Geno_Freq/", width = 12, height = 10, device = "pdf", filename = paste(chr, "Freq_scans.pdf",sep = "_"))       
+
+
+#=====================================================#
+#=====================================================#
+# ------ Make average frequencies by individuals ----
+# 
+# IF you want to get get the average rate of each genotype 
+# over one specific region (typically supergene) within each samples
+#
+#=====================================================#
+#=====================================================#
+
+# define your region
+start=10000000
+end=25000000
+
+# format table :
+position_vector=as.numeric(str_remove(rownames(geno_table), paste(chr, "_", sep ="")))
+geno_table$position = position_vector
+geno_table_region = geno_table[c(geno_table$position > start & geno_table$position < end),]
+
+# get average genotype by individual
+table_by_sample = apply(geno_table_region[,-ncol(geno_table_region)], 2, table) / nrow(geno_table_region)
+table_by_sample_t = as.data.frame(t(table_by_sample))
+table_by_sample_t$sample <- rownames(table_by_sample_t)
+
+# Add pop name from pop_list 
+table_by_sample_t$sociality <- ifelse(table_by_sample_t$sample %in% pop_list$monogyne,
+                       "monogyne", "polygyne")
+
+# format for plot
+table_by_sample_t_melt = melt(table_by_sample_t)
+
+freq = ggplot(data = table_by_sample_t_soc_melt) +
+  geom_violin(aes(x = vec_mono_poly, y = value, colour = variable, fill = variable),
+              alpha = 0.3) +
+  ylab("Genotype frequencies") +
+  xlab("groups") +
+  
+  scale_y_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
+  
+  scale_colour_manual(values=RColorBrewer::brewer.pal(3, "Set1"),
+                     name = "genotype",
+                     label = c("Homozygous to ref", "heterozygous", "homozygous alt")) +
+  scale_fill_manual(values=RColorBrewer::brewer.pal(3, "Set1"), guide = "none") +
+  theme(text = element_text(size=12),
+        panel.grid.major = element_line(size = 0.5, linetype = 'solid',
+                                        colour = "white"),
+        panel.background = element_rect(fill = "white",
+                                        colour = "black",
+                                        size = 0.5))
+freq
+ggsave(freq, path="Geno_Freq/", width = 10, height = 10, device = "pdf", filename = paste(chr, "Group_Genotype.pdf",sep = "_"))       
